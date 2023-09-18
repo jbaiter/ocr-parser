@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Sourced from http://chroniclingamerica.loc.gov/lccn/sn86069133/1910-10-31/ed-1/seq-1/ocr.xml -->
+<alto xmlns="http://schema.ccs-gmbh.com/ALTO">
+  <Description>
+    <MeasurementUnit>inch1200</MeasurementUnit>
+    <sourceImageInformation>
+      <fileName>
+        \\libdpsrv1\storage\root\projects\NDNP\win_19101017-19101231\win_19101017-19101231-scan-1-\ocr\0070.tif</fileName>
+    </sourceImageInformation>
+    <OCRProcessing ID="ID0">
+      <ocrProcessingStep>
+        <processingStepSettings>useAbbyy4:0
+          dictionaryFlag.D:American-English
+          ImgPrep Component Count High Estimate:31557
+          useCaere:0
+          Abbyy6OCREngine Character Error Ratio:0.1398
+          splitwords:0
+          ScansoftOCREngine Character Count:21156
+          conjoinWords:1
+          dictionaryOn:1
+          IrisOCREngine Character Count:24661
+          Abbyy6OCREngine Character Count:24501
+          Abbyy6OCREngine STAT BLOCK:STATBLOCK_Abbyy6OCREngine;24501;3425;43.9106;93.2252
+          language:en
+          ScansoftOCREngine Predicted Accuracy:65.12%
+          page-reoriented:UP
+          loadfromfile:true
+          suppressPunctuation:false
+          multipleEngineWeight:0
+          suggestionCount:1
+          Node Count:8562
+          ScansoftOCREngine Character Error Ratio:0.4152
+          spawned:1
+          IrisOCREngine Character Error Ratio:0
+          IrisOCREngine STAT BLOCK:STATBLOCK_IrisOCREngine;24661;0;0;0
+          cachePath:/jobq/caches/newpah_legacy
+          monkeyTimeout:1800
+          Predicted Word Accuracy:93.23%
+          lexicondirectory:\jobq\caches\lex\wintertree\
+          text-orientation:UP
+          IrisOCREngine Predicted Accuracy:0%
+          verboseOutput:false
+          trimwords:1
+          Abbyy6OCREngine Predicted Accuracy:93.23%
+          ImgPrep Component Range:31451,31557
+          version:Newpah v2.07 Apocalypse in 7/4
+          ScansoftOCREngine STAT BLOCK:STATBLOCK_ScansoftOCREngine;21156;8785;0.770562;65.1163
+          noPunctuation:1
+          ImgPrep Component Count Low Estimate:31451
+          DictionaryFlagsUsed:D
+          configFile:/jobq/caches/newpah_legacy/config/newpah_acwi_x.xml
+        </processingStepSettings>
+        <processingSoftware>
+          <softwareCreator>iArchives</softwareCreator>
+          <softwareName>Newpah</softwareName>
+          <softwareVersion>v2.07</softwareVersion>
+        </processingSoftware>
+      </ocrProcessingStep>
+    </OCRProcessing>
+  </Description>
+  <Styles>
+    <TextStyle ID="ID3" FONTSIZE="10.0" />
+    <TextStyle ID="ID4" FONTSIZE="20.0" />
+    <TextStyle ID="ID5" FONTSIZE="68.0" />
+    <TextStyle ID="ID7" FONTSIZE="9.0" />
+    <TextStyle ID="ID8" FONTSIZE="35.0" />
+    <TextStyle ID="ID9" FONTSIZE="33.0" />
+    <TextStyle ID="ID11" FONTSIZE="56.0" />
+    <TextStyle ID="ID12" FONTSIZE="14.0" />
+    <TextStyle ID="ID13" FONTSIZE="49.0" />
+    <TextStyle ID="ID14" FONTSIZE="34.0" />
+    <TextStyle ID="ID15" FONTSIZE="8.0" />
+    <TextStyle ID="ID16" FONTSIZE="5.0" />
+    <TextStyle ID="ID19" FONTSIZE="7.0" />
+    <TextStyle ID="ID21" FONTSIZE="11.0" />
+    <TextStyle ID="ID24" FONTSIZE="22.0" />
+    <TextStyle ID="ID25" FONTSIZE="12.0" />
+    <TextStyle ID="ID28" FONTSIZE="21.0" />
+  </Styles>
+  <Layout>
+    <Page ID="ID1" HEIGHT="25941" WIDTH="20463" PHYSICAL_IMG_NR="1" PRINTED_IMG_NR="[1]"
+      PROCESSING="ID0">
+      <PrintSpace HEIGHT="24453.0" WIDTH="19500.0" HPOS="294.0" VPOS="954.0" PC="0.93230003">
+        <TextBlock xmlns:ns1="http://www.w3.org/1999/xlink" ID="ID2" HEIGHT="1701" WIDTH="16026"
+          HPOS="294" VPOS="972" ns1:type="simple" language="en">
+          <TextLine HEIGHT="90.0" WIDTH="3570.0" HPOS="3960.0" VPOS="972.0">
+            <String HEIGHT="81.0" WIDTH="36.0" HPOS="3960.0" VPOS="981.0" CONTENT="J" WC="0.8095238" />
+            <SP WIDTH="36.0" HPOS="3996.0" VPOS="981.0" />
+            <String HEIGHT="66.0" WIDTH="42.0" HPOS="4032.0" VPOS="993.0" CONTENT="a" WC="0.8095238" />
+            <SP WIDTH="68.0" HPOS="4074.0" VPOS="993.0" />
+            <String HEIGHT="81.0" WIDTH="228.0" HPOS="4143.0" VPOS="972.0" CONTENT="Ira"
+              WC="0.95238096" />
+            <SP WIDTH="447.0" HPOS="4371.0" VPOS="972.0" />
+            <String HEIGHT="84.0" WIDTH="81.0" HPOS="4818.0" VPOS="975.0" CONTENT="mj"
+              WC="0.8095238" />
+            <SP WIDTH="687.0" HPOS="4899.0" VPOS="975.0" />
+            <String HEIGHT="63.0" WIDTH="105.0" HPOS="5586.0" VPOS="984.0" CONTENT="iI"
+              WC="0.8095238" />
+            <SP WIDTH="416.0" HPOS="5691.0" VPOS="984.0" />
+            <String HEIGHT="90.0" WIDTH="810.0" HPOS="6108.0" VPOS="972.0" CONTENT="tE1r"
+              WC="0.8095238" />
+            <SP WIDTH="585.0" HPOS="6918.0" VPOS="972.0" />
+            <String HEIGHT="51.0" WIDTH="27.0" HPOS="7503.0" VPOS="1008.0" CONTENT="3"
+              WC="0.8095238" />
+          </TextLine>
+          <TextLine HEIGHT="39.0" WIDTH="24.0" HPOS="6792.0" VPOS="1065.0">
+            <String HEIGHT="39.0" WIDTH="24.0" HPOS="6792.0" VPOS="1065.0" CONTENT="i"
+              WC="0.8095238" />
+          </TextLine>
+          <TextLine HEIGHT="42.0" WIDTH="30.0" HPOS="2517.0" VPOS="1125.0">
+            <String STYLEREFS="ID3" HEIGHT="42.0" WIDTH="30.0" HPOS="2517.0" VPOS="1125.0"
+              CONTENT="c" WC="0.8095238" />
+          </TextLine>
+          <TextLine HEIGHT="1269.0" WIDTH="16026.0" HPOS="294.0" VPOS="1404.0">
+            <String HEIGHT="1269.0" WIDTH="2052.0" HPOS="294.0" VPOS="1404.0" CONTENT="JiLas"
+              WC="0.8095238">
+              <ALTERNATIVE>Jails</ALTERNATIVE>
+            </String>
+            <SP WIDTH="272.0" HPOS="2346.0" VPOS="1404.0" />
+            <String STYLEREFS="ID4" HEIGHT="219.0" WIDTH="1023.0" HPOS="2619.0" VPOS="2184.0"
+              CONTENT="Edition" WC="0.95238096" />
+            <SP WIDTH="677.0" HPOS="3642.0" VPOS="2184.0" />
+            <String STYLEREFS="ID5" HEIGHT="771.0" WIDTH="1920.0" HPOS="4320.0" VPOS="1839.0"
+              CONTENT="THE" WC="1.0">
+              <ALTERNATIVE>TIIE</ALTERNATIVE>
+              <ALTERNATIVE>TIE</ALTERNATIVE>
+            </String>
+            <SP WIDTH="503.0" HPOS="6240.0" VPOS="1839.0" />
+            <String STYLEREFS="ID5" HEIGHT="792.0" WIDTH="6312.0" HPOS="6744.0" VPOS="1833.0"
+              CONTENT="WINCHESTER" WC="1.0" />
+            <SP WIDTH="527.0" HPOS="13056.0" VPOS="1833.0" />
+            <String STYLEREFS="ID5" HEIGHT="771.0" WIDTH="2736.0" HPOS="13584.0" VPOS="1824.0"
+              CONTENT="NEWS" WC="1.0" />
+          </TextLine>
+        </TextBlock>
+        <TextBlock xmlns:ns2="http://www.w3.org/1999/xlink" ID="ID6" HEIGHT="21906" WIDTH="2577"
+          HPOS="4002" VPOS="3252" ns2:type="simple" language="en">
+          <TextLine HEIGHT="246.0" WIDTH="2487.0" HPOS="4020.0" VPOS="3252.0">
+            <String STYLEREFS="ID3" HEIGHT="246.0" WIDTH="15.0" HPOS="4020.0" VPOS="3252.0"
+              CONTENT="I" WC="0.8095238" />
+            <SP WIDTH="47.0" HPOS="4035.0" VPOS="3252.0" />
+            <String STYLEREFS="ID7" HEIGHT="108.0" WIDTH="201.0" HPOS="4083.0" VPOS="3270.0"
+              CONTENT="her" WC="1.0" />
+            <SP WIDTH="53.0" HPOS="4284.0" VPOS="3270.0" />
+            <String STYLEREFS="ID7" HEIGHT="132.0" WIDTH="480.0" HPOS="4338.0" VPOS="3270.0"
+              CONTENT="injuries" WC="0.95238096">
+              <ALTERNATIVE>inlurie</ALTERNATIVE>
+              <ALTERNATIVE>inure</ALTERNATIVE>
+            </String>
+            <SP WIDTH="53.0" HPOS="4818.0" VPOS="3270.0" />
+            <String STYLEREFS="ID7" HEIGHT="72.0" WIDTH="246.0" HPOS="4872.0" VPOS="3309.0"
+              CONTENT="wsis" WC="0.82539684">
+              <ALTERNATIVE>W1S</ALTERNATIVE>
+              <ALTERNATIVE>ams</ALTERNATIVE>
+              <ALTERNATIVE>sis</ALTERNATIVE>
+              <ALTERNATIVE>aims</ALTERNATIVE>
+            </String>
+            <SP WIDTH="62.0" HPOS="5118.0" VPOS="3309.0" />
+            <String STYLEREFS="ID7" HEIGHT="108.0" WIDTH="327.0" HPOS="5181.0" VPOS="3279.0"
+              CONTENT="made" WC="1.0">
+              <ALTERNATIVE>mncle</ALTERNATIVE>
+              <ALTERNATIVE>manacle</ALTERNATIVE>
+            </String>
+            <SP WIDTH="167.0" HPOS="5508.0" VPOS="3279.0" />
+            <String STYLEREFS="ID7" HEIGHT="105.0" WIDTH="168.0" HPOS="5676.0" VPOS="3279.0"
+              CONTENT="Dr" WC="0.82539684">
+              <ALTERNATIVE>Ik</ALTERNATIVE>
+              <ALTERNATIVE>Ir</ALTERNATIVE>
+            </String>
+            <SP WIDTH="92.0" HPOS="5844.0" VPOS="3279.0" />
+            <String STYLEREFS="ID7" HEIGHT="132.0" WIDTH="570.0" HPOS="5937.0" VPOS="3279.0"
+              CONTENT="Reynolds" WC="0.95238096">
+              <ALTERNATIVE>Reynold</ALTERNATIVE>
+            </String>
+          </TextLine>
+          <TextLine HEIGHT="141.0" WIDTH="2364.0" HPOS="4077.0" VPOS="3429.0">
+            <String STYLEREFS="ID7" HEIGHT="69.0" WIDTH="141.0" HPOS="4077.0" VPOS="3471.0"
+              CONTENT="an" WC="0.82539684" />
+            <SP WIDTH="81.0" HPOS="4218.0" VPOS="3471.0" />
+            <String STYLEREFS="ID7" HEIGHT="96.0" WIDTH="207.0" HPOS="4299.0" VPOS="3471.0"
+              CONTENT="eye" WC="1.0" />
+            <SP WIDTH="71.0" HPOS="4506.0" VPOS="3471.0" />
+            <String STYLEREFS="ID7" HEIGHT="132.0" WIDTH="597.0" HPOS="4578.0" VPOS="3438.0"
+              CONTENT="specialist" WC="0.95238096">
+              <ALTERNATIVE>pliitlist</ALTERNATIVE>
+              <ALTERNATIVE>littlest</ALTERNATIVE>
+            </String>
+            <SP WIDTH="101.0" HPOS="5175.0" VPOS="3438.0" />
+            <String STYLEREFS="ID7" HEIGHT="102.0" WIDTH="321.0" HPOS="5277.0" VPOS="3450.0"
+              CONTENT="after" WC="0.95238096">
+              <ALTERNATIVE>aftei</ALTERNATIVE>
+            </String>
+            <SP WIDTH="72.0" HPOS="5598.0" VPOS="3450.0" />
+            <String STYLEREFS="ID7" HEIGHT="123.0" WIDTH="189.0" HPOS="5670.0" VPOS="3429.0"
+              CONTENT="lite" WC="0.82539684">
+              <ALTERNATIVE>tlle</ALTERNATIVE>
+              <ALTERNATIVE>elite</ALTERNATIVE>
+              <ALTERNATIVE>tulle</ALTERNATIVE>
+            </String>
+            <SP WIDTH="71.0" HPOS="5859.0" VPOS="3429.0" />
+            <String STYLEREFS="ID7" HEIGHT="108.0" WIDTH="510.0" HPOS="5931.0" VPOS="3447.0"
+              CONTENT="examina" WC="0.82539684">
+              <ALTERNATIVE>exalnina</ALTERNATIVE>
+              <ALTERNATIVE>examine</ALTERNATIVE>
+              <ALTERNATIVE>exanimate</ALTERNATIVE>
+            </String>
+          </TextLine>
+          <TextLine HEIGHT="132.0" WIDTH="2370.0" HPOS="4056.0" VPOS="5355.0">
+            <String STYLEREFS="ID7" HEIGHT="90.0" WIDTH="324.0" HPOS="4056.0" VPOS="5373.0"
+              CONTENT="cents" WC="1.0" />
+            <SP WIDTH="98.0" HPOS="4380.0" VPOS="5373.0" />
+            <String STYLEREFS="ID7" HEIGHT="105.0" WIDTH="222.0" HPOS="4479.0" VPOS="5361.0"
+              CONTENT="and" WC="0.95238096">
+              <ALTERNATIVE>ancl</ALTERNATIVE>
+              <ALTERNATIVE>8111</ALTERNATIVE>
+              <ALTERNATIVE>encl</ALTERNATIVE>
+            </String>
+            <SP WIDTH="66.0" HPOS="4701.0" VPOS="5361.0" />
+            <String STYLEREFS="ID7" HEIGHT="105.0" WIDTH="135.0" HPOS="4767.0" VPOS="5361.0"
+              CONTENT="GO" WC="0.96825397">
+              <ALTERNATIVE>GII</ALTERNATIVE>
+            </String>
+            <SP WIDTH="65.0" HPOS="4902.0" VPOS="5361.0" />
+            <String STYLEREFS="ID7" HEIGHT="108.0" WIDTH="132.0" HPOS="4968.0" VPOS="5358.0"
+              CONTENT="of" WC="1.0" />
+            <SP WIDTH="62.0" HPOS="5100.0" VPOS="5358.0" />
+            <String STYLEREFS="ID7" HEIGHT="129.0" WIDTH="384.0" HPOS="5163.0" VPOS="5358.0"
+              CONTENT="Henry" WC="0.95238096">
+              <ALTERNATIVE>Hcl1IY</ALTERNATIVE>
+              <ALTERNATIVE>Ilenly</ALTERNATIVE>
+              <ALTERNATIVE>Silently</ALTERNATIVE>
+            </String>
+            <SP WIDTH="59.0" HPOS="5547.0" VPOS="5358.0" />
+            <String STYLEREFS="ID7" HEIGHT="105.0" WIDTH="81.0" HPOS="5607.0" VPOS="5355.0"
+              CONTENT="C" WC="0.96825397" />
+            <SP WIDTH="105.0" HPOS="5688.0" VPOS="5355.0" />
+            <String STYLEREFS="ID7" HEIGHT="102.0" WIDTH="294.0" HPOS="5793.0" VPOS="5358.0"
+              CONTENT="Hall" WC="0.95238096">
+              <ALTERNATIVE>lIall</ALTERNATIVE>
+              <ALTERNATIVE>hail</ALTERNATIVE>
+              <ALTERNATIVE>leally</ALTERNATIVE>
+            </String>
+            <SP WIDTH="62.0" HPOS="6087.0" VPOS="5358.0" />
+            <String STYLEREFS="ID7" HEIGHT="72.0" WIDTH="276.0" HPOS="6150.0" VPOS="5388.0"
+              CONTENT="aver" SUBS_TYPE="HypPart1" SUBS_CONTENT="averAge" WC="1.0">
+              <ALTERNATIVE>1el</ALTERNATIVE>
+            </String>
+            <HYP WIDTH="1.0" HPOS="6427.0" VPOS="5388.0" CONTENT="-" />
+          </TextLine>
+          <TextLine HEIGHT="126.0" WIDTH="2388.0" HPOS="4053.0" VPOS="5520.0">
+            <String STYLEREFS="ID7" HEIGHT="90.0" WIDTH="213.0" HPOS="4053.0" VPOS="5556.0"
+              CONTENT="age" SUBS_TYPE="HypPart2" SUBS_CONTENT="averAge" WC="1.0">
+              <ALTERNATIVE>agc</ALTERNATIVE>
+              <ALTERNATIVE>ac</ALTERNATIVE>
+            </String>
+            <SP WIDTH="80.0" HPOS="4266.0" VPOS="5556.0" />
+            <String STYLEREFS="ID7" HEIGHT="123.0" WIDTH="399.0" HPOS="4347.0" VPOS="5523.0"
+              CONTENT="weight" WC="1.0" />
+            <SP WIDTH="92.0" HPOS="4746.0" VPOS="5523.0" />
+            <String STYLEREFS="ID7" HEIGHT="96.0" WIDTH="321.0" HPOS="4839.0" VPOS="5526.0"
+              CONTENT="1410" WC="0.82539684">
+              <ALTERNATIVE>14111</ALTERNATIVE>
+            </String>
+            <SP WIDTH="126.0" HPOS="5160.0" VPOS="5526.0" />
+            <String STYLEREFS="ID7" HEIGHT="63.0" WIDTH="27.0" HPOS="5286.0" VPOS="5556.0"
+              CONTENT="&gt;" WC="0.82539684" />
+            <SP WIDTH="12.0" HPOS="5313.0" VPOS="5556.0" />
+            <String STYLEREFS="ID7" HEIGHT="105.0" WIDTH="369.0" HPOS="5325.0" VPOS="5520.0"
+              CONTENT="ounds" WC="0.82539684">
+              <ALTERNATIVE>bounds</ALTERNATIVE>
+            </String>
+            <SP WIDTH="75.0" HPOS="5694.0" VPOS="5520.0" />
+            <String STYLEREFS="ID7" HEIGHT="96.0" WIDTH="132.0" HPOS="5769.0" VPOS="5529.0"
+              CONTENT="at" WC="1.0" />
+            <SP WIDTH="75.0" HPOS="5901.0" VPOS="5529.0" />
+            <String STYLEREFS="ID7" HEIGHT="102.0" WIDTH="63.0" HPOS="5976.0" VPOS="5520.0"
+              CONTENT="0" WC="0.82539684">
+              <ALTERNATIVE>6</ALTERNATIVE>
+              <ALTERNATIVE>G</ALTERNATIVE>
+            </String>
+            <SP WIDTH="83.0" HPOS="6039.0" VPOS="5520.0" />
+            <String STYLEREFS="ID7" HEIGHT="99.0" WIDTH="318.0" HPOS="6123.0" VPOS="5523.0"
+              CONTENT="cents" WC="1.0">
+              <ALTERNATIVE>ccnts</ALTERNATIVE>
+              <ALTERNATIVE>accents</ALTERNATIVE>
+            </String>
+          </TextLine>
+        </TextBlock>
+      </PrintSpace>
+    </Page>
+  </Layout>
+</alto>
