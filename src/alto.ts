@@ -16,11 +16,12 @@ import {
   toReadableStream,
   resolveXmlEntities,
   getAttributeValue,
+  getAllAttributes,
 } from './util';
+import { ReferenceSizeCallback } from '.';
 
 type ParserContext = {
   scaleFactor: number;
-  page: OcrPage | null;
   elementStack: OcrElement[];
 };
 
@@ -58,24 +59,25 @@ async function handlePage(
   eventIter: AsyncIterableIterator<[SaxEventType, Detail]>,
   ctx: ParserContext,
   tag: Tag,
-  referenceSize: Dimensions,
-): Promise<void> {
+  referenceSize?: Dimensions,
+): Promise<OcrPage | null> {
   const dims = getCoordinates(tag);
   if (!dims.width || !dims.height) {
     throw new Error('Could not get Page dimensions');
   }
-  const scaleFactorX = referenceSize.width / dims.height!;
-  const scaleFactorY = referenceSize.height / dims.width!;
+  const scaleFactorX = referenceSize ? referenceSize.width / dims.height! : 1;
+  const scaleFactorY = referenceSize ? referenceSize.height / dims.width! : 1;
   if (scaleFactorX !== scaleFactorY) {
     console.warn(
       `Scale factors differ: x=${scaleFactorX} vs y=${scaleFactorY}, using X scale factor.`,
     );
   }
   ctx.scaleFactor = scaleFactorX;
-  ctx.page = makePage({
+  const page = makePage({
     width: dims.width * scaleFactorX,
     height: dims.height * scaleFactorX,
   });
+  ctx.elementStack.push(page);
 
   let openTags = 0;
   let result: IteratorResult<[SaxEventType, Detail]>;
@@ -94,6 +96,7 @@ async function handlePage(
     await handleBlock(eventIter, ctx, data as Tag);
   }
   ctx.elementStack.pop();
+  return page;
 }
 
 async function handleBlock(
@@ -111,7 +114,7 @@ async function handleBlock(
     width: dims.width * ctx.scaleFactor,
     height: dims.height * ctx.scaleFactor,
   });
-  ctx.page!.children.push(block);
+  (ctx.elementStack.slice(-1)[0] as OcrPage).children.push(block);
   ctx.elementStack.push(block);
 
   let openTags = 0;
@@ -248,10 +251,28 @@ async function handleWord(
   line.children.push(word);
 }
 
-export async function parseAltoPage(
+/**
+ * Parse an ALTO document.
+ *
+ * @param hocr The ALTO document to parse. Can be a `string`, a `Uint8Array` or
+ *   a `ReadableStream`.
+ * @param referenceSizes An array of dimensions for each page in the document,
+ *   or a callback that returns the dimensions for a given page, based on its
+ *   numerical index and its XML attributes. These dimensions can be used to
+ *   scale all coordinates to a given reference frame in cases when the display
+ *   resolution is different from the OCR resolution. A reference size might be
+ *   required to obtain pixel coordinates, since in some documents the
+ *   coordinates are expressed in non-pixel units.
+ * @returns An async generator that yields `OcrPage` objects.
+ */
+export async function* parseAltoPages(
   alto: ReadableStream | Uint8Array | string,
-  referenceSize: Dimensions,
-): Promise<OcrPage> {
+  referenceSizes?: Dimensions[] | ReferenceSizeCallback,
+): AsyncGenerator<OcrPage> {
+  if (Array.isArray(referenceSizes)) {
+    const sizeArr = referenceSizes;
+    referenceSizes = (idx: number) => sizeArr[idx] ?? null;
+  }
   const readable: ReadableStream<Uint8Array> =
     typeof alto === 'string' || alto instanceof Uint8Array
       ? toReadableStream(alto)
@@ -259,29 +280,43 @@ export async function parseAltoPage(
   const parser = await getParser(readable);
   const ctx: ParserContext = {
     scaleFactor: 1,
-    page: null,
     elementStack: [],
   };
   const eventIter = parser.iterate();
   let result: IteratorResult<[SaxEventType, Detail]>;
+  let pageIdx = 0;
   while (!(result = await eventIter.next()).done) {
     const [evt, data] = result.value;
+
+    if (
+      evt === SaxEventType.CloseTag &&
+      (data as Tag).name === 'MeasurementUnit'
+    ) {
+      const unit = (data as Tag).textNodes[0].value.trim();
+      if (unit !== 'pixel' && !referenceSizes) {
+        throw new Error(`Measurement unit ${unit} requires a reference size.`);
+      }
+    }
 
     // Handlers advance the iterator themselves until they're done with their
     // respective element, this entry level just needs to recognize the
     // beginning of the page element and then hand over to the page handler
     // function.
-    if (evt !== SaxEventType.OpenTag || (data as Tag).name !== 'Page') {
+    if (evt !== SaxEventType.OpenTag) {
       continue;
     }
 
-    await handlePage(eventIter, ctx, data as Tag, referenceSize);
-    break;
+    if ((data as Tag).name === 'Page') {
+      const page = await handlePage(
+        eventIter,
+        ctx,
+        data as Tag,
+        referenceSizes?.(pageIdx, getAllAttributes(data as Tag)) ?? undefined,
+      );
+      if (page) {
+        yield page;
+        pageIdx++;
+      }
+    }
   }
-
-  if (!ctx.page) {
-    throw new Error('Failed to parse hOCR document');
-  }
-
-  return ctx.page;
 }

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { describe, test, expect, beforeAll } from 'vitest';
-import { type OcrLine, parseHocrPage, initialize } from '../src';
+import { parseHocrPages, initialize } from '../src';
 
 const makeHocr = (hocrBody: string) => `
 <?xml version="1.0" encoding="UTF-8"?>
@@ -83,24 +83,42 @@ const saxWasm = fs.readFileSync(
   __dirname + '/../node_modules/sax-wasm/lib/sax-wasm.wasm',
 );
 
+async function toArray<T>(gen: AsyncGenerator<T>): Promise<T[]> {
+  const result: T[] = [];
+  for await (let page of gen) {
+    result.push(page);
+  }
+  return result;
+}
+
 describe('hOCR parser', () => {
   beforeAll(() => {
     initialize(() => Promise.resolve(new Uint8Array(saxWasm)));
   });
   test('should parse a simple hOCR document', async () => {
-    const page = await parseHocrPage(BASIC_HOCR, { width: 800, height: 600 });
-    expect(page.lines).toMatchSnapshot();
-    expect(page.text).toEqual('Hello World, how are the Nightingales');
+    const pages = await toArray(
+      parseHocrPages(BASIC_HOCR, [{ width: 800, height: 600 }]),
+    );
+    expect(pages).toHaveLength(1);
+    const page = pages[0];
+    expect(page?.lines).toMatchSnapshot();
+    expect(page?.text).toEqual('Hello World, how are the Nightingales');
   });
 
   test('should be able to handle a hOCR doc with alternatives', async () => {
-    const page = await parseHocrPage(HOCR_WITH_ALTERNATIVES, {
-      width: 20145,
-      height: 26970,
-    });
-    expect(page.text).toMatchInlineSnapshot(
+    const pages = await toArray(
+      parseHocrPages(HOCR_WITH_ALTERNATIVES, [
+        {
+          width: 20145,
+          height: 26970,
+        },
+      ]),
+    );
+    expect(pages).toHaveLength(1);
+    const page = pages[0];
+    expect(page?.text).toMatchInlineSnapshot(
       '"i IIi IiI j I I i II THE STANDARD OGDEN UTAH SATURDAY AUGUST 7 1909 j"',
     );
-    expect(page.lines).toMatchSnapshot();
+    expect(page?.lines).toMatchSnapshot();
   });
 });

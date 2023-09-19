@@ -11,7 +11,7 @@ export const SAX_WASM_VERSION = '2.2.4';
 let xmlParserWasm: Uint8Array | null = null;
 
 /**
- * Fetch the SAX parser WASM and store it in our global variable.
+ * Fetch the SAX parser WASM and and make it accessible for parsing.
  *
  * @param loadSaxWasm - A function that returns the SAX parser WASM as a
  *   {@link Uint8Array}. Make sure to use the same version as the one specified
@@ -138,6 +138,12 @@ export function getAttributeValue(
   return attr?.value?.value;
 }
 
+export function getAllAttributes(tag: Tag): { [key: string]: string } {
+  return Object.fromEntries(
+    tag.attributes.map((a) => [a.name.value, a.value.value]),
+  );
+}
+
 /** A StaX-like wrapper around the SAX parser that allows. */
 export class StaxParser {
   readable: ReadableStream<Uint8Array>;
@@ -193,4 +199,14 @@ export class StaxParser {
       yield this.accumulator.shift()!;
     }
   }
+}
+
+export function logWithPosition(
+  msg: string,
+  level: 'log' | 'warn' | 'error' = 'log',
+  tag: Tag,
+): void {
+  console[level](
+    `At line ${tag.openStart.line}, column ${tag.openStart.character}: ${msg}`,
+  );
 }

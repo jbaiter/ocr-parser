@@ -18,7 +18,10 @@ import {
   toReadableStream,
   resolveXmlEntities,
   getAttributeValue,
+  getAllAttributes,
+  logWithPosition,
 } from './util';
+import { ReferenceSizeCallback } from '.';
 
 type HocrAttribs = {
   [key: string]: string;
@@ -62,7 +65,7 @@ async function handleChildren(
     if (evt === SaxEventType.Text && allowedTypes.has('text')) {
       const parentElem = ctx.elementStack.slice(-1)[0];
       if (typeof parentElem !== 'string' && parentElem.type === 'line') {
-        // TODO: Normalize multiple whitespace characters to a single one
+        // Normalize multiple whitespace characters to a single one
         const txt = (data as Text).value.replace(/\s+/g, ' ');
         const whitespaceOnly = txt === ' ';
         // Don't add whitespace-only string at beginning or end of line and
@@ -89,10 +92,12 @@ async function handleChildren(
       continue;
     }
     if (!allowedTypes.has(hocrType)) {
-      console.warn(
+      logWithPosition(
         `Unexpected hOCR element type: ${hocrType}, expected one of [${Array.from(
           allowedTypes,
         ).join(', ')}]`,
+        'warn',
+        tag,
       );
       continue;
     }
@@ -123,12 +128,14 @@ async function handlePage(
   eventIter: AsyncIterableIterator<[SaxEventType, Detail]>,
   tag: Tag,
   ctx: ParserContext,
-  referenceSize: Dimensions,
-): Promise<void> {
+  referenceSize?: Dimensions,
+): Promise<OcrPage | null> {
   const hocrAttribs = parseHocrAttribs(tag);
   const pageSize = hocrAttribs.bbox as [number, number, number, number];
-  ctx.scaleFactor = determineScaleFactor(pageSize, referenceSize);
-  ctx.page = makePage({
+  ctx.scaleFactor = referenceSize
+    ? determineScaleFactor(pageSize, referenceSize)
+    : 1;
+  const page = makePage({
     width: pageSize[2] * ctx.scaleFactor,
     height: pageSize[3] * ctx.scaleFactor,
     id: (hocrAttribs.x_source ??
@@ -136,12 +143,13 @@ async function handlePage(
       hocrAttribs.ppageno ??
       hocrAttribs.lpageno) as string | undefined,
   });
-  ctx.elementStack.push(ctx.page);
+  ctx.elementStack.push(page);
   await handleChildren(
     eventIter,
     new Set(['block', 'paragraph', 'line']),
     ctx,
   );
+  return page;
 }
 
 async function handleBlock(
@@ -202,7 +210,7 @@ async function handleLine(
 ): Promise<void> {
   const parsedAttribs = parseHocrAttribs(tag);
   if (!('bbox' in parsedAttribs)) {
-    console.warn('Missing bbox attribute on line element');
+    logWithPosition('Missing bbox attribute on line element', 'warn', tag);
     return;
   }
   const [ulx, uly, lrx, lry] = (parsedAttribs.bbox as number[]).map(
@@ -283,8 +291,8 @@ async function handleWord(
     }
   }
   if (!wordText.length) {
-    // TODO: Should this fail the parse?
-    throw new Error('Word element has no text');
+    logWithPosition('Word element has no text, skipping.', 'warn', tag);
+    return;
   }
   const word: OcrWord = {
     type: 'word',
@@ -328,7 +336,7 @@ function determineScaleFactor(
     scaledHeight !== referenceSize.height
   ) {
     console.warn(
-      `Differing scale factors for x and y axis while parsing hOCR: x=${scaleFactorX}, y=${scaleFactorY}`,
+      `Differing scale factors for x and y axis while parsing hOCR, will use X factor: x=${scaleFactorX}, y=${scaleFactorY}`,
     );
   }
   return scaleFactorX;
@@ -336,7 +344,6 @@ function determineScaleFactor(
 
 type ParserContext = {
   scaleFactor: number;
-  page: OcrPage | null;
   elementStack: OcrElement[];
 };
 
@@ -376,11 +383,26 @@ function getHocrType(tag: Tag): HocrType | null {
   }
 }
 
-/** Parse an hOCR document */
-export async function parseHocrPage(
+/**
+ * Parse an hOCR document.
+ *
+ * @param hocr The hOCR document to parse. Can be a `string`, a `Uint8Array` or
+ *   a `ReadableStream`.
+ * @param referenceSizes An array of pixel dimensions for each page in the
+ *   document, or a callback that returns the dimensions for a given page,
+ *   based on its numerical index and its XML attributes. These dimensions can
+ *   be used to scale all coordinates to a given reference frame in cases when
+ *   the display resolution is different from the OCR resolution.
+ * @returns An async generator that yields `OcrPage` objects.
+ */
+export async function* parseHocrPages(
   hocr: ReadableStream<Uint8Array> | Uint8Array | string,
-  referenceSize: Dimensions,
-): Promise<OcrPage> {
+  referenceSizes?: Dimensions[] | ReferenceSizeCallback,
+): AsyncGenerator<OcrPage> {
+  if (Array.isArray(referenceSizes)) {
+    const sizeArr = referenceSizes;
+    referenceSizes = (idx: number) => sizeArr[idx] ?? null;
+  }
   const readable: ReadableStream<Uint8Array> =
     typeof hocr === 'string' || hocr instanceof Uint8Array
       ? toReadableStream(hocr)
@@ -388,9 +410,9 @@ export async function parseHocrPage(
   const parser = await getParser(readable);
   const ctx: ParserContext = {
     scaleFactor: 1,
-    page: null,
     elementStack: [],
   };
+  let pageIdx = 0;
   const eventIter = parser.iterate();
   let result: IteratorResult<[SaxEventType, Detail]>;
   while (!(result = await eventIter.next()).done) {
@@ -409,27 +431,30 @@ export async function parseHocrPage(
       continue;
     }
 
-    await handlePage(eventIter, data as Tag, ctx, referenceSize);
-    break;
-  }
-
-  if (!ctx.page) {
-    throw new Error('Failed to parse hOCR document');
-  }
-  const hasSpacesEncoded = ctx.page.lines.some((line) =>
-    line.children.some(
-      (child) => typeof child === 'string' && child.includes(' '),
-    ),
-  );
-  if (!hasSpacesEncoded) {
-    // Add spaces between words, except for last word on line
-    for (const line of ctx.page.lines) {
-      for (let idx = 0; idx < line.children.length - 1; idx++) {
-        if (typeof line.children[idx + 1] !== 'string') {
-          line.children.splice(idx + 1, 0, ' ');
+    const page = await handlePage(
+      eventIter,
+      data as Tag,
+      ctx,
+      referenceSizes?.(pageIdx, getAllAttributes(data as Tag)) ?? undefined,
+    );
+    if (!page) {
+      continue;
+    }
+    const hasSpacesEncoded = page.lines.some((line) =>
+      line.children.some(
+        (child) => typeof child === 'string' && child.includes(' '),
+      ),
+    );
+    if (!hasSpacesEncoded) {
+      // Add spaces between words, except for last word on line
+      for (const line of page.lines) {
+        for (let idx = 0; idx < line.children.length - 1; idx++) {
+          if (typeof line.children[idx + 1] !== 'string') {
+            line.children.splice(idx + 1, 0, ' ');
+          }
         }
       }
     }
+    yield page;
   }
-  return ctx.page;
 }

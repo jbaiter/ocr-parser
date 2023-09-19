@@ -6,7 +6,10 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "keywords": [
-    "ocr"
+    "ocr",
+    "parser",
+    "domless",
+    "worker"
   ],
   "author": "Johannes Baiter <johannes.baiter@gmail.com>",
   "license": "MIT",
