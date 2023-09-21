@@ -6,6 +6,7 @@ import {
   Tag,
 } from 'sax-wasm';
 
+/** Version of sax-wasm used in the library. */
 export const SAX_WASM_VERSION = '2.2.4';
 
 let xmlParserWasm: Uint8Array | null = null;
@@ -28,6 +29,7 @@ export async function initialize(
   xmlParserWasm = await loadSaxWasm();
 }
 
+/** Check if the XML parser was already initialized with the required WASM. */
 export function isInitialized(): boolean {
   return xmlParserWasm !== null;
 }

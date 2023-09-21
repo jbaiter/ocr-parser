@@ -4,10 +4,12 @@ export type Dimensions = {
   height: number;
 };
 
+/**
+ * Coordinates of an element, expressed in pixel units with the origin in the
+ * upper left.
+ */
 export type Coordinates = {
-  /** 0-based x-offset (origin left) in pixels */
   x: number;
-  /** 0-based y-offset (origin top) in pixels */
   y: number;
 };
 
@@ -19,6 +21,14 @@ export type WordChoice = {
   probability?: number;
 };
 
+/**
+ * A 'word' as recognized by an OCR engine.
+ *
+ * Corresponds to the following types:
+ *
+ * - HOCR: `ocrx_word`
+ * - ALTO: `String` and descendants
+ */
 export type OcrWord = Dimensions &
   Coordinates & {
     type: 'word';
@@ -31,6 +41,14 @@ export type OcrWord = Dimensions &
     hyphenStart?: boolean;
   };
 
+/**
+ * A line as recognized by an OCR engine.
+ *
+ * Corresponds to the following types:
+ *
+ * - HOCR: `ocr_line`
+ * - ALTO: `TextLine`
+ */
 export type OcrLine = Dimensions &
   Coordinates & {
     type: 'line';
@@ -65,12 +83,23 @@ export function makeLine(
   };
 }
 
+/**
+ * A paragraph as recognized by an OCR engine.
+ *
+ * Corresponds to the following types:
+ *
+ * - HOCR: `ocr_par`
+ * - ALTO: Not mapped
+ */
 export type OcrParagraph = Partial<Dimensions & Coordinates> & {
   type: 'paragraph';
-  /** Lines in the paragraph */
+  /** Descendant elements of the paragraph, currently only lines possible. */
   children: OcrLine[];
+  /** All lines in the paragraph. */
   lines: OcrLine[];
+  /** All words in the paragraph. */
   words: OcrWord[];
+  /** Text content of the paragraph. */
   text: string;
 };
 
@@ -103,14 +132,26 @@ export function makeParagraph(
   };
 }
 
+/**
+ * A 'block' of text as recognized by an OCR engine.
+ *
+ * Corresponds to the following types:
+ *
+ * - HOCR: `ocr_carea`
+ * - ALTO: `TextBlock`
+ */
 export type OcrBlock = Dimensions &
   Coordinates & {
     type: 'block';
+    /** Descendant elements of the block, can be paragraphs or lines. */
     children: (OcrParagraph | OcrLine)[];
     /** Paragraphs in the block */
     paragraphs: OcrParagraph[];
+    /** All lines in the block. */
     lines: OcrLine[];
+    /** All words in the block. */
     words: OcrWord[];
+    /** Text content of the block. */
     text: string;
   };
 
@@ -160,16 +201,29 @@ export function makeBlock(
   };
 }
 
+/**
+ * A page of text as recognized by an OCR engine.
+ *
+ * Corresponds to the following types:
+ *
+ * - HOCR: `ocr_page`
+ * - ALTO: `Page`
+ */
 export type OcrPage = Dimensions & {
   type: 'page';
   /** Identifier of the page, if present */
   id?: string;
+  /** Direct descendants of the page element. */
   children: (OcrBlock | OcrParagraph | OcrLine)[];
+  /** All blocks of text on the page */
   blocks: OcrBlock[];
+  /** All paragraphs on the page. */
   paragraphs: OcrParagraph[];
-  /** Structure flattened to a sequence of lines */
+  /** All lines on the page. */
   lines: OcrLine[];
+  /** All words on the page. */
   words: OcrWord[];
+  /** Text content of the page. */
   text: string;
 };
 
@@ -229,6 +283,7 @@ export function makePage(
   };
 }
 
+/** Union of all possible OCR element types. */
 export type OcrElement =
   | string
   | OcrWord

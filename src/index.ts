@@ -5,9 +5,25 @@ import { type Dimensions, type OcrPage } from './model';
 
 export { parseHocrPages } from './hocr';
 export { parseAltoPages } from './alto';
-export { initialize } from './util';
-export { OcrPage, OcrBlock, OcrParagraph, OcrLine, OcrWord } from './model';
+export { initialize, isInitialized, SAX_WASM_VERSION } from './util';
+export type {
+  Dimensions,
+  Coordinates,
+  WordChoice,
+  OcrPage,
+  OcrBlock,
+  OcrParagraph,
+  OcrLine,
+  OcrWord,
+} from './model';
 
+/**
+ * Callback to provide a reference size for a given page.
+ *
+ * @param idx: 0-based index of the page in the document.
+ * @param pageAttribs: XML attributes of the page element.
+ * @returns The reference size , or `null` if no reference size is available.
+ */
 export type ReferenceSizeCallback = (
   idx: number,
   pageAttribs: { [key: string]: string },

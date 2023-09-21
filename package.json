@@ -14,12 +14,13 @@
   "author": "Johannes Baiter <johannes.baiter@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "vitest && tsc",
+    "build": "vitest run && tsc",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "format": "prettier --write src test"
+    "format": "prettier --write src test",
+    "docs": "typedoc src/index.ts"
   },
   "dependencies": {
     "sax-wasm": "2.2.4"
@@ -27,6 +28,7 @@
   "devDependencies": {
     "prettier": "^3.0.3",
     "prettier-plugin-jsdoc": "^1.0.1",
+    "typedoc": "^0.25.1",
     "typescript": "^5.2.2",
     "vitest": "^0.34.3"
   },
@@ -38,5 +40,8 @@
     "plugins": [
       "prettier-plugin-jsdoc"
     ]
+  },
+  "typedocOptions": {
+    "out": "_site"
   }
 }
