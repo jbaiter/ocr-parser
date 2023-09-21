@@ -104,16 +104,19 @@ async function handleChildren(
     switch (hocrType) {
       case 'block':
         await handleBlock(eventIter, tag, ctx);
+        openTags--;
         break;
       case 'paragraph':
         await handleParagraph(eventIter, tag, ctx);
+        openTags--;
         break;
       case 'line':
         await handleLine(eventIter, tag, ctx);
+        openTags--;
         break;
       case 'word':
         await handleWord(eventIter, tag, ctx);
-        openTags--; // Words handle the closing themselves
+        openTags--;
         break;
       default:
         break;

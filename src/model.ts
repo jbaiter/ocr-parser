@@ -122,7 +122,7 @@ export function makeParagraph(
         out.push(child.text);
         if (
           idx < this.children.length - 1 &&
-          !child.words.slice(-1)[0].hyphenStart
+          !child.words.slice(-1)[0]?.hyphenStart
         ) {
           out.push(' ');
         }
@@ -187,7 +187,7 @@ export function makeBlock(
         out.push(child.text);
         if (
           idx < this.children.length - 1 &&
-          !child.words.slice(-1)[0].hyphenStart
+          !child.words.slice(-1)[0]?.hyphenStart
         ) {
           if (child.type === 'line') {
             out.push(' ');
@@ -269,7 +269,7 @@ export function makePage(
         out.push(child.text);
         if (
           idx < this.children.length - 1 &&
-          !child.words.slice(-1)[0].hyphenStart
+          !child.words.slice(-1)[0]?.hyphenStart
         ) {
           if (child.type === 'line') {
             out.push(' ');

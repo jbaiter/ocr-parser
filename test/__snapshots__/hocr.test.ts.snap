@@ -409,6 +409,31 @@ exports[`hOCR parser > should be able to handle a hOCR doc with alternatives 2`]
 ]
 `;
 
+exports[`hOCR parser > should be able to handle lines with only empty words 1`] = `
+[
+  {
+    "children": [],
+    "height": 1225,
+    "text": "",
+    "type": "line",
+    "width": 771,
+    "words": [],
+    "x": 0,
+    "y": 0,
+  },
+  {
+    "children": [],
+    "height": 1,
+    "text": "",
+    "type": "line",
+    "width": 1,
+    "words": [],
+    "x": 0,
+    "y": 0,
+  },
+]
+`;
+
 exports[`hOCR parser > should parse a simple hOCR document 1`] = `
 [
   {

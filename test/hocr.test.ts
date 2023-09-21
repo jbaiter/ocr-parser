@@ -2,6 +2,9 @@ import fs from 'fs';
 import { describe, test, expect, beforeAll } from 'vitest';
 import { parseHocrPages, initialize } from '../src';
 
+//@ts-expect-error
+import WITH_EMPTY_LINE from './__fixtures__/hocr_emptyline.html?raw';
+
 const makeHocr = (hocrBody: string) => `
 <?xml version="1.0" encoding="UTF-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -121,4 +124,12 @@ describe('hOCR parser', () => {
     );
     expect(page?.lines).toMatchSnapshot();
   });
+
+  test('should be able to handle lines with only empty words', async () => {
+    const pages = await toArray(
+      parseHocrPages(WITH_EMPTY_LINE)
+    );
+    expect(pages).toHaveLength(1);
+    expect(pages[0].lines).toMatchSnapshot();
+  })
 });
