@@ -206,16 +206,16 @@ export function makeBlock(
   };
 }
 
-const OCR_FEATURES = {
+export const OcrFeatures = {
   POLYGONS: 'POLYGONS',
   BASELINE: 'BASELINE',
   CONFIDENCE: 'CONFIDENCE',
   CHOICES: 'CHOICES',
   HYPHEN: 'HYPHEN',
 } as const;
-type OcrFeature = typeof OCR_FEATURES[keyof typeof OCR_FEATURES];
+export type OcrFeature = typeof OcrFeatures[keyof typeof OcrFeatures];
 
-type ImageSource = {
+export type ImageSource = {
   /** File name or path associated with the image the page was sourced from. */
   fileName?: string;
   /** Generic identifier for the image file the page was sourced from. */

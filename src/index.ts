@@ -9,12 +9,17 @@ export { initialize, isInitialized, SAX_WASM_VERSION } from './util';
 export type {
   Dimensions,
   Coordinates,
+  PageLocation,
   WordChoice,
   OcrPage,
   OcrBlock,
   OcrParagraph,
   OcrLine,
   OcrWord,
+  OcrFeature,
+  OcrFeatures,
+  ImageSource,
+  Polygon,
 } from './model';
 
 /**
