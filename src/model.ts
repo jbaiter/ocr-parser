@@ -1,17 +1,25 @@
-/** Dimensions expressed in pixels */
+export type PageLocation = Dimensions & Coordinates & {
+  /** Polygon defining the outline of the element. */
+  polygon?: Polygon;
+}
+/** Dimensions of an element's bounding box, expressed in pixels */
 export type Dimensions = {
   width: number;
   height: number;
 };
 
 /**
- * Coordinates of an element, expressed in pixel units with the origin in the
- * upper left.
+ * Coordinates of a point on the page, expressed in pixel units with
+ * the origin in the upper left. If set on an element itself, the point
+ * is the upper-left corner of the bounding box.
  */
 export type Coordinates = {
   x: number;
   y: number;
 };
+
+/** Polygon defining the outlines of an element. */
+export type Polygon = Coordinates[];
 
 /** A choice among multiple alternative words for a given position. */
 export type WordChoice = {
@@ -29,8 +37,7 @@ export type WordChoice = {
  * - HOCR: `ocrx_word`
  * - ALTO: `String` and descendants
  */
-export type OcrWord = Dimensions &
-  Coordinates & {
+export type OcrWord = {
     type: 'word';
     text: string;
     /** Floating point number between 0 and 1 */
@@ -39,7 +46,7 @@ export type OcrWord = Dimensions &
     choices?: WordChoice[];
     /** Is the word the first part of a hyphenated word? */
     hyphenStart?: boolean;
-  };
+  } & PageLocation;
 
 /**
  * A line as recognized by an OCR engine.
@@ -49,21 +56,20 @@ export type OcrWord = Dimensions &
  * - HOCR: `ocr_line`
  * - ALTO: `TextLine`
  */
-export type OcrLine = Dimensions &
-  Coordinates & {
+export type OcrLine = {
     type: 'line';
     /**
      * Baseline upon which the characters in the word rest. Defined by a set of
      * coordinates that form a polyline.
      */
-    baseline?: [number, number] | [number, number][];
+    baseline?: Coordinates[];
     /** Words on the line */
     words: OcrWord[];
     /** Words intermingled with text outside of words (including spaces) */
     children: (OcrWord | string)[];
     /** Plaintext of the line */
     text: string;
-  };
+  } & PageLocation;
 
 export function makeLine(
   spec: Omit<OcrLine, 'type' | 'children' | 'words' | 'text'>,
@@ -91,7 +97,7 @@ export function makeLine(
  * - HOCR: `ocr_par`
  * - ALTO: Not mapped
  */
-export type OcrParagraph = Partial<Dimensions & Coordinates> & {
+export type OcrParagraph = {
   type: 'paragraph';
   /** Descendant elements of the paragraph, currently only lines possible. */
   children: OcrLine[];
@@ -101,7 +107,7 @@ export type OcrParagraph = Partial<Dimensions & Coordinates> & {
   words: OcrWord[];
   /** Text content of the paragraph. */
   text: string;
-};
+} & Partial<PageLocation>;
 
 export function makeParagraph(
   spec: Omit<OcrParagraph, 'type' | 'children' | 'lines' | 'words' | 'text'>,
@@ -140,8 +146,7 @@ export function makeParagraph(
  * - HOCR: `ocr_carea`
  * - ALTO: `TextBlock`
  */
-export type OcrBlock = Dimensions &
-  Coordinates & {
+export type OcrBlock = {
     type: 'block';
     /** Descendant elements of the block, can be paragraphs or lines. */
     children: (OcrParagraph | OcrLine)[];
@@ -153,7 +158,7 @@ export type OcrBlock = Dimensions &
     words: OcrWord[];
     /** Text content of the block. */
     text: string;
-  };
+  } & PageLocation;
 
 export function makeBlock(
   spec: Omit<
@@ -201,6 +206,30 @@ export function makeBlock(
   };
 }
 
+const OCR_FEATURES = {
+  POLYGONS: 'POLYGONS',
+  BASELINE: 'BASELINE',
+  CONFIDENCE: 'CONFIDENCE',
+  CHOICES: 'CHOICES',
+  HYPHEN: 'HYPHEN',
+} as const;
+type OcrFeature = typeof OCR_FEATURES[keyof typeof OCR_FEATURES];
+
+type ImageSource = {
+  /** File name or path associated with the image the page was sourced from. */
+  fileName?: string;
+  /** Generic identifier for the image file the page was sourced from. */
+  fileIdentifier?: string;
+  /** Generic identifier for the document the page was souced from. */
+  documentIdentifier?: string;
+  /** Resolution in pixels per inch of the scanned document image the page was sourced from. */
+  ppi?: number;
+  /** Checksum of the associated image file. */
+  checksum?: string;
+  /** Type of algorithm used to calculate the checksum. */
+  checksumType?: string;
+}
+
 /**
  * A page of text as recognized by an OCR engine.
  *
@@ -211,8 +240,14 @@ export function makeBlock(
  */
 export type OcrPage = Dimensions & {
   type: 'page';
-  /** Identifier of the page, if present */
-  id?: string;
+  /** Special features used by this page. */
+  features: OcrFeature[];
+  /** Information about associated image. */
+  imageSource?: ImageSource;
+  /** Physical page number of the page. */
+  physicalPageNumber?: number;
+  /** "Logical" page number as printed/written on the page */
+  logicalPageNumber?: string;
   /** Direct descendants of the page element. */
   children: (OcrBlock | OcrParagraph | OcrLine)[];
   /** All blocks of text on the page */

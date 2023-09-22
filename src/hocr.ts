@@ -7,6 +7,7 @@ import {
   OcrPage,
   OcrParagraph,
   OcrWord,
+  Polygon,
   WordChoice,
   makeBlock,
   makeLine,
@@ -44,9 +45,28 @@ function parseHocrAttribs(tag: Tag): HocrAttribs {
         .map((x: string) => Number.parseInt(x, 10));
     } else {
       acc[key] = val.split(' ').slice(1, 5).join(' ');
+      if (acc[key].startsWith('"') && acc[key].endsWith('"')) {
+        acc[key] = acc[key].slice(1, -1);
+      }
     }
     return acc;
   }, {});
+}
+
+function parsePolygon(polyAttr: string, scaleFactor: number): Polygon {
+  return polyAttr
+    .split(' ')
+    .map((x) => Number.parseFloat(x))
+    .reduce((acc, c) => {
+      const last = acc.slice(-1)[0];
+      if (!last || last.length === 2) {
+        acc.push([c]);
+      } else {
+        last.push(c);
+      }
+      return acc;
+    }, [] as number[][])
+    .map(([x, y]) => ({ x: scaleFactor * x, y: scaleFactor * y }));
 }
 
 async function handleChildren(
@@ -139,19 +159,61 @@ async function handlePage(
     ? determineScaleFactor(pageSize, referenceSize)
     : 1;
   const page = makePage({
+    features: [],
     width: pageSize[2] * ctx.scaleFactor,
     height: pageSize[3] * ctx.scaleFactor,
-    id: (hocrAttribs.x_source ??
-      hocrAttribs.image ??
-      hocrAttribs.ppageno ??
-      hocrAttribs.lpageno) as string | undefined,
   });
+  if ('ppageno' in hocrAttribs) {
+    page.physicalPageNumber = Number.parseInt(hocrAttribs.ppageno, 10);
+  }
+  if ('lpageno' in hocrAttribs) {
+    page.logicalPageNumber = hocrAttribs.lpageno;
+  }
+  if ('image' in hocrAttribs) {
+    page.imageSource = {
+      fileName: hocrAttribs.image,
+    };
+  }
+  if ('x_source' in hocrAttribs) {
+    if (!page.imageSource) {
+      page.imageSource = {};
+    }
+    page.imageSource.documentIdentifier = hocrAttribs.x_source;
+  }
+  if ('imagemd5' in hocrAttribs) {
+    if (!page.imageSource) {
+      page.imageSource = {};
+    }
+    page.imageSource.checksum = hocrAttribs.imagemd5;
+    page.imageSource.checksumType = 'MD5';
+  }
+  if ('scan_res' in hocrAttribs) {
+    if (!page.imageSource) {
+      page.imageSource = {};
+    }
+    page.imageSource.ppi = Number.parseInt(hocrAttribs.scan_res.split(' ')[0], 10);
+  }
+
   ctx.elementStack.push(page);
   await handleChildren(
     eventIter,
     new Set(['block', 'paragraph', 'line']),
     ctx,
   );
+  for (const elem of ['blocks', 'paragraphs', 'lines'] as const) {
+    if ((page[elem] ?? []).some((e) => e.polygon !== undefined)) {
+      page.features.push('POLYGONS');
+    }
+  }
+  if (page.words.some((w) => w.choices !== undefined)) {
+    page.features.push('CHOICES');
+  }
+  if (page.words.some((w) => w.hyphenStart)) {
+    page.features.push('HYPHEN');
+  }
+  if (page.words.some((w) => w.confidence !== undefined)) {
+    page.features.push('CONFIDENCE');
+  }
   return page;
 }
 
@@ -170,6 +232,9 @@ async function handleBlock(
     width: lrx - ulx,
     height: lry - uly,
   });
+  if ('poly' in hocrAttribs) {
+    block.polygon = parsePolygon(hocrAttribs.poly, ctx.scaleFactor);
+  }
   (ctx.elementStack.slice(-1)[0] as OcrPage).children.push(block);
   ctx.elementStack.push(block);
   await handleChildren(eventIter, new Set(['paragraph', 'line']), ctx);
@@ -200,6 +265,9 @@ async function handleParagraph(
     width,
     height,
   });
+  if ('poly' in hocrAttribs) {
+    paragraph.polygon = parsePolygon(hocrAttribs.poly, ctx.scaleFactor);
+  }
   const parentElem = ctx.elementStack.slice(-1)[0] as OcrPage | OcrBlock;
   parentElem.children.push(paragraph);
   ctx.elementStack.push(paragraph);
@@ -225,7 +293,20 @@ async function handleLine(
     width: lrx - ulx,
     height: lry - uly,
   });
-  // TODO: Baseline?
+  if ('poly' in parsedAttribs) {
+    line.polygon = parsePolygon(parsedAttribs.poly, ctx.scaleFactor);
+  }
+  if ('baseline' in parsedAttribs) {
+    const parts = parsedAttribs.baseline.split(' ');
+    const slope = Number.parseFloat(parts[0]);
+    const intercept = Number.parseInt(parts[1], 10);
+    const ulx = line.x;
+    const uly = line.y;
+    line.baseline = [
+      { x: ulx, y: uly + intercept },
+      { x: ulx + line.width, y: uly + intercept + (line.width * slope) },
+    ]
+  }
   const parentElem = ctx.elementStack.slice(-1)[0] as
     | OcrPage
     | OcrBlock
@@ -238,6 +319,18 @@ async function handleLine(
   // Strip whitespace from end of line
   if (line.children.slice(-1)[0] === ' ') {
     line.children = line.children.slice(0, -1);
+  }
+
+  // Normalize word confidences to [0, 1]
+  const needsNormalization = line.words.some(
+    w => w.confidence !== undefined && w.confidence > 1);
+  if (needsNormalization) {
+    // We're assuming a [0, 100] range for confidence values
+    for (const word of line.words) {
+      if (word.confidence !== undefined) {
+        word.confidence /= 100;
+      }
+    }
   }
 }
 
@@ -315,8 +408,12 @@ async function handleWord(
   if (word.text.includes('&')) {
     word.text = resolveXmlEntities(word.text);
   }
-  // TODO: Confidence
-  // TODO: Hyphenation
+  if ('poly' in parsedAttribs) {
+    word.polygon = parsePolygon(parsedAttribs.poly, ctx.scaleFactor);
+  }
+  if ('x_wconf' in parsedAttribs) {
+    word.confidence = Number.parseFloat(parsedAttribs.x_wconf);
+  }
   (ctx.elementStack.slice(-1)[0] as OcrLine).children.push(word);
 }
 

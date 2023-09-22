@@ -2,6 +2,21 @@ import fs from 'fs';
 import { describe, test, expect, beforeAll } from 'vitest';
 import { parseHocrPages, initialize } from '../src';
 
+// Custom serializer that ignores getters
+expect.addSnapshotSerializer({
+  test: (val) =>
+    typeof val === 'object' &&
+    Object.values(Object.getOwnPropertyDescriptors(val)).some((d) => d.get),
+  serialize(val, config, indentation, depth, refs, printer) {
+    const filtered = Object.fromEntries(
+      Object.entries(val).filter(
+        ([k]) => !Object.getOwnPropertyDescriptor(val, k)?.get,
+      ),
+    );
+    return printer(filtered, config, indentation, depth, refs);
+  },
+});
+
 //@ts-expect-error
 import WITH_EMPTY_LINE from './__fixtures__/hocr_emptyline.html?raw';
 
@@ -104,7 +119,7 @@ describe('hOCR parser', () => {
     );
     expect(pages).toHaveLength(1);
     const page = pages[0];
-    expect(page?.lines).toMatchSnapshot();
+    expect(page).toMatchSnapshot();
     expect(page?.text).toEqual('Hello World, how are the Nightingales');
   });
 
@@ -126,10 +141,8 @@ describe('hOCR parser', () => {
   });
 
   test('should be able to handle lines with only empty words', async () => {
-    const pages = await toArray(
-      parseHocrPages(WITH_EMPTY_LINE)
-    );
+    const pages = await toArray(parseHocrPages(WITH_EMPTY_LINE));
     expect(pages).toHaveLength(1);
     expect(pages[0].lines).toMatchSnapshot();
-  })
+  });
 });

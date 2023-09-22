@@ -676,8 +676,109 @@ exports[`parseAltoPage > parses alto lines 2`] = `
       "y": 229.05192552330288,
     },
   ],
+  "features": [
+    "CHOICES",
+    "HYPHEN",
+    "CONFIDENCE",
+  ],
   "height": 6113,
+  "imageSource": {
+    "fileName": "
+        \\\\\\\\libdpsrv1\\\\storage\\\\root\\\\projects\\\\NDNP\\\\win_19101017-19101231\\\\win_19101017-19101231-scan-1-\\\\ocr\\\\0070.tif",
+  },
+  "logicalPageNumber": "[1]",
+  "physicalPageNumber": 1,
   "type": "page",
   "width": 4822.10859257546,
+}
+`;
+
+exports[`parseAltoPage > parses alto lines with shapes 2`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "confidence": 0.82,
+              "height": 96,
+              "polygon": [
+                {
+                  "x": 325,
+                  "y": 1456,
+                },
+                {
+                  "x": 419,
+                  "y": 1456,
+                },
+                {
+                  "x": 419,
+                  "y": 1552,
+                },
+                {
+                  "x": 325,
+                  "y": 1552,
+                },
+              ],
+              "text": "EEn",
+              "type": "word",
+              "width": 94,
+              "x": 325,
+              "y": 1456,
+            },
+          ],
+          "height": 96,
+          "polygon": [
+            {
+              "x": 325,
+              "y": 1456,
+            },
+            {
+              "x": 1023,
+              "y": 1456,
+            },
+            {
+              "x": 1023,
+              "y": 1504,
+            },
+            {
+              "x": 419,
+              "y": 1504,
+            },
+            {
+              "x": 419,
+              "y": 1552,
+            },
+            {
+              "x": 325,
+              "y": 1552,
+            },
+          ],
+          "type": "line",
+          "width": 698,
+          "x": 325,
+          "y": 1456,
+        },
+      ],
+      "height": 198,
+      "type": "block",
+      "width": 785,
+      "x": 318,
+      "y": 1456,
+    },
+  ],
+  "features": [
+    "POLYGONS",
+    "CONFIDENCE",
+  ],
+  "height": 2560,
+  "imageSource": {
+    "fileName": "shape.png",
+  },
+  "logicalPageNumber": "I",
+  "physicalPageNumber": 1,
+  "type": "page",
+  "width": 1440,
 }
 `;

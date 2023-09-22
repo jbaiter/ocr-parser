@@ -6,7 +6,7 @@ import {
   OcrLine,
   OcrPage,
   OcrWord,
-  WordChoice,
+  Polygon,
   makeBlock,
   makeLine,
   makePage,
@@ -17,12 +17,14 @@ import {
   resolveXmlEntities,
   getAttributeValue,
   getAllAttributes,
+  logWithPosition,
 } from './util';
 import { ReferenceSizeCallback } from '.';
 
 type ParserContext = {
   scaleFactor: number;
   elementStack: OcrElement[];
+  sourceImageInformation?: OcrPage['imageSource'];
 };
 
 const NUMERIC_ATTRIBS = ['HEIGHT', 'WIDTH', 'HPOS', 'VPOS', 'WC'];
@@ -74,10 +76,19 @@ async function handlePage(
   }
   ctx.scaleFactor = scaleFactorX;
   const page = makePage({
+    features: [],
     width: dims.width * scaleFactorX,
     height: dims.height * scaleFactorX,
   });
   ctx.elementStack.push(page);
+
+  const pageAttribs = getAllAttributes(tag);
+  if ('PHYSICAL_IMG_NR' in pageAttribs) {
+    page.physicalPageNumber = Number.parseInt(pageAttribs.PHYSICAL_IMG_NR);
+  }
+  if ('PRINTED_IMG_NR' in pageAttribs) {
+    page.logicalPageNumber = pageAttribs.PRINTED_IMG_NR;
+  }
 
   let openTags = 0;
   let result: IteratorResult<[SaxEventType, Detail]>;
@@ -90,12 +101,32 @@ async function handlePage(
     }
 
     openTags++;
-    if ((data as Tag).name !== 'TextBlock') {
-      continue;
+    const tag = data as Tag;
+    if (tag.name === 'TextBlock') {
+      await handleBlock(eventIter, ctx, data as Tag);
     }
-    await handleBlock(eventIter, ctx, data as Tag);
   }
   ctx.elementStack.pop();
+  for (const elem of ['blocks', 'paragraphs', 'lines'] as const) {
+    if ((page[elem] ?? []).some((e) => e.polygon !== undefined)) {
+      page.features.push('POLYGONS');
+    }
+  }
+  if (page.words.some((w) => w.choices !== undefined)) {
+    page.features.push('CHOICES');
+  }
+  if (page.words.some((w) => w.hyphenStart)) {
+    page.features.push('HYPHEN');
+  }
+  if (page.words.some((w) => w.confidence !== undefined)) {
+    page.features.push('CONFIDENCE');
+  }
+  if (ctx.sourceImageInformation) {
+    page.imageSource = ctx.sourceImageInformation;
+    // Source Image information only applies to the first page in a file, all further pages
+    // are undefined, as far as I can tell from the ALTO XSD.
+    ctx.sourceImageInformation = undefined;
+  }
   return page;
 }
 
@@ -105,14 +136,11 @@ async function handleBlock(
   tag: Tag,
 ): Promise<void> {
   const dims = getCoordinates(tag);
-  if (!dims.width || !dims.height) {
-    throw new Error('Could not get TextBlock dimensions');
-  }
   const block = makeBlock({
-    x: dims.x! * ctx.scaleFactor,
-    y: dims.y! * ctx.scaleFactor,
-    width: dims.width * ctx.scaleFactor,
-    height: dims.height * ctx.scaleFactor,
+    x: dims.x ? dims.x! * ctx.scaleFactor : -1,
+    y: dims.y ? dims.y! * ctx.scaleFactor : -1,
+    width: dims.width ? dims.width * ctx.scaleFactor : -1,
+    height: dims.height ? dims.height * ctx.scaleFactor : -1,
   });
   (ctx.elementStack.slice(-1)[0] as OcrPage).children.push(block);
   ctx.elementStack.push(block);
@@ -128,10 +156,15 @@ async function handleBlock(
     }
 
     openTags++;
-    if ((data as Tag).name !== 'TextLine') {
-      continue;
+    const tag = data as Tag;
+    if (tag.name === 'TextLine') {
+      await handleLine(eventIter, ctx, data as Tag);
+    } else if (tag.name === 'Shape') {
+      const polygon = await handleShape(eventIter, ctx, tag);
+      if (polygon != null) {
+        block.polygon = polygon;
+      }
     }
-    await handleLine(eventIter, ctx, data as Tag);
   }
   ctx.elementStack.pop();
 }
@@ -142,14 +175,11 @@ async function handleLine(
   tag: Tag,
 ): Promise<void> {
   const dims = getCoordinates(tag);
-  if (!dims.width || !dims.height) {
-    throw new Error('Could not get Line dimensions');
-  }
   const line = makeLine({
-    x: dims.x! * ctx.scaleFactor,
-    y: dims.y! * ctx.scaleFactor,
-    width: dims.width * ctx.scaleFactor,
-    height: dims.height * ctx.scaleFactor,
+    x: dims.x ? dims.x * ctx.scaleFactor : -1,
+    y: dims.y ? dims.y * ctx.scaleFactor : -1,
+    width: dims.width ? dims.width * ctx.scaleFactor : -1,
+    height: dims.height ? dims.height * ctx.scaleFactor : -1,
   });
   (ctx.elementStack.slice(-1)[0] as OcrBlock).children.push(line);
   ctx.elementStack.push(line);
@@ -166,12 +196,18 @@ async function handleLine(
     }
 
     openTags++;
-    if ((data as Tag).name === 'String') {
+    const tag = data as Tag;
+    if (tag.name === 'String') {
       await handleWord(eventIter, ctx, data as Tag);
       // Words handle their closing themselves
       openTags--;
-    } else if ((data as Tag).name === 'SP') {
+    } else if (tag.name === 'SP') {
       line.children.push(' ');
+    } else if (tag.name === 'Shape') {
+      const polygon = await handleShape(eventIter, ctx, tag);
+      if (polygon != null) {
+        line.polygon = polygon;
+      }
     }
   }
   ctx.elementStack.pop();
@@ -185,15 +221,71 @@ async function handleLine(
   }
 }
 
+async function handleShape(
+  eventIter: AsyncIterableIterator<[SaxEventType, Detail]>,
+  ctx: ParserContext,
+  tag: Tag,
+): Promise<Polygon | null> {
+  let polygon: Polygon | null = null;
+  let openTags = 0;
+  let result: IteratorResult<[SaxEventType, Detail]>;
+  while (openTags >= 0 && !(result = await eventIter.next()).done) {
+    const [evt, data] = result.value;
+    if (evt === SaxEventType.CloseTag) {
+      openTags--;
+    }
+    if (evt !== SaxEventType.OpenTag) {
+      continue;
+    }
+    openTags++;
+    const tag = data as Tag;
+    if (tag.name === 'Polygon') {
+      const points = getAttributeValue(tag, 'POINTS');
+      if (!points) {
+        logWithPosition(
+          '<Polygon> without POINTS attribute, ignoring',
+          'warn',
+          tag,
+        );
+        continue;
+      }
+      polygon = points
+        .split(' ')
+        .map((p) => p.split(/(,| )/).map((c) => Number.parseFloat(c)))
+        .reduce((acc, [c]) => {
+          const lastElem: number[] | undefined = acc.slice(-1)[0];
+          if (!lastElem || lastElem.length === 2) {
+            acc.push([c]);
+          } else {
+            lastElem.push(c);
+          }
+          return acc;
+        }, [] as number[][])
+        .map(([x, y]) => ({ x: x * ctx.scaleFactor, y: y * ctx.scaleFactor }));
+    }
+  }
+  const parent = ctx.elementStack.slice(-1)[0] as OcrBlock | OcrLine | OcrWord;
+  if (parent.x < 0 || parent.y < 0 || parent.width < 0 || parent.height < 0) {
+    if (polygon) {
+      parent.x = Math.min(...polygon.map((p) => p.x));
+      parent.y = Math.min(...polygon.map((p) => p.y));
+      parent.width = Math.max(...polygon.map((p) => p.x)) - parent.x;
+      parent.height = Math.max(...polygon.map((p) => p.y)) - parent.y;
+    } else {
+      throw new Error(
+        `Could not get dimensions for ${parent.type}, no HPOS/VPOS/WIDTH/HEIGHT attribs and no associated Shape`,
+      );
+    }
+  }
+  return polygon;
+}
+
 async function handleWord(
   eventIter: AsyncIterableIterator<[SaxEventType, Detail]>,
   ctx: ParserContext,
   tag: Tag,
 ): Promise<void> {
   const dims = getCoordinates(tag);
-  if (!dims.width || !dims.height) {
-    throw new Error('Could not get String dimensions');
-  }
   let text = getAttributeValue(tag, 'CONTENT');
   if (!text) {
     throw new Error('Could not get String text');
@@ -205,12 +297,13 @@ async function handleWord(
 
   const word: OcrWord = {
     type: 'word',
-    x: dims.x! * ctx.scaleFactor,
-    y: dims.y! * ctx.scaleFactor,
-    width: dims.width * ctx.scaleFactor,
-    height: dims.height * ctx.scaleFactor,
+    x: dims.x ? dims.x * ctx.scaleFactor : -1,
+    y: dims.y ? dims.y * ctx.scaleFactor : -1,
+    width: dims.width ? dims.width * ctx.scaleFactor : -1,
+    height: dims.height ? dims.height * ctx.scaleFactor : -1,
     text,
   };
+  ctx.elementStack.push(word);
 
   const subsType = getAttributeValue(tag, 'SUBS_TYPE');
   if (subsType === 'HypPart1') {
@@ -245,10 +338,55 @@ async function handleWord(
       }
     } else if (evt === SaxEventType.OpenTag) {
       openTags++;
+      if ((data as Tag).name === 'Shape') {
+        const polygon = await handleShape(eventIter, ctx, tag);
+        if (polygon != null) {
+          word.polygon = polygon;
+        }
+      }
     }
   }
-  const line = ctx.elementStack.slice(-1)[0] as OcrLine;
+  const line = ctx.elementStack.slice(-2)[0] as OcrLine;
   line.children.push(word);
+  ctx.elementStack.pop();
+}
+
+async function handleSourceImageInformation(
+  eventIter: AsyncGenerator<[SaxEventType, Detail], any, unknown>,
+  ctx: ParserContext,
+  _tag: Tag,
+): Promise<void> {
+  let openTags = 0;
+  let result: IteratorResult<[SaxEventType, Detail]>;
+  ctx.sourceImageInformation = {};
+  while (openTags >= 0 && !(result = await eventIter.next()).done) {
+    const [evt, data] = result.value;
+    const tag = data as Tag;
+    if (evt === SaxEventType.CloseTag) {
+      openTags--;
+      if (tag.name === 'fileName') {
+        ctx.sourceImageInformation.fileName = tag.textNodes
+          .map((t) => t.value)
+          .join('');
+      } else if (tag.name === 'fileIdentifier') {
+        let ident = tag.textNodes.map((t) => t.value).join('');
+        const location = getAttributeValue(tag, 'fileIdentifierLocation');
+        if (location) {
+          ident = `${location}:${ident}`;
+        }
+        ctx.sourceImageInformation.fileIdentifier = ident;
+      } else if (tag.name === 'documentIdentifier') {
+        let ident = tag.textNodes.map((t) => t.value).join('');
+        const location = getAttributeValue(tag, 'documentIdentifierLocation');
+        if (location) {
+          ident = `${location}:${ident}`;
+        }
+        ctx.sourceImageInformation.documentIdentifier = ident;
+      }
+    } else if (evt === SaxEventType.OpenTag) {
+      openTags++;
+    }
+  }
 }
 
 /**
@@ -306,7 +444,8 @@ export async function* parseAltoPages(
       continue;
     }
 
-    if ((data as Tag).name === 'Page') {
+    const tag = data as Tag;
+    if (tag.name === 'Page') {
       const page = await handlePage(
         eventIter,
         ctx,
@@ -317,6 +456,8 @@ export async function* parseAltoPages(
         yield page;
         pageIdx++;
       }
+    } else if (tag.name === 'sourceImageInformation') {
+      await handleSourceImageInformation(eventIter, ctx, tag);
     }
   }
 }
