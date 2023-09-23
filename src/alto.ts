@@ -10,7 +10,7 @@ import {
   makeBlock,
   makeLine,
   makePage,
-} from './model';
+} from './model.js';
 import {
   getParser,
   toReadableStream,
@@ -18,7 +18,7 @@ import {
   getAttributeValue,
   getAllAttributes,
   logWithPosition,
-} from './util';
+} from './util.js';
 import { ReferenceSizeCallback } from '.';
 
 type ParserContext = {

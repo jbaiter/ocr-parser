@@ -1,11 +1,11 @@
-import { parseHocrPages } from './hocr';
-import { parseAltoPages } from './alto';
-import { toReadableStream, isInitialized } from './util';
-import { type Dimensions, type OcrPage } from './model';
+import { parseHocrPages } from './hocr.js';
+import { parseAltoPages } from './alto.js';
+import { toReadableStream, isInitialized } from './util.js';
+import { type Dimensions, type OcrPage } from './model.js';
 
-export { parseHocrPages } from './hocr';
-export { parseAltoPages } from './alto';
-export { initialize, isInitialized, SAX_WASM_VERSION } from './util';
+export { parseHocrPages } from './hocr.js';
+export { parseAltoPages } from './alto.js';
+export { initialize, isInitialized, setupLogging, SAX_WASM_VERSION } from './util.js';
 export type {
   Dimensions,
   Coordinates,

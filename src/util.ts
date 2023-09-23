@@ -10,6 +10,12 @@ import {
 export const SAX_WASM_VERSION = '2.2.4';
 
 let xmlParserWasm: Uint8Array | null = null;
+let logger = {
+  debug: console.debug,
+  info: console.info,
+  warn: console.warn,
+  error: console.error,
+};
 
 /**
  * Fetch the SAX parser WASM and and make it accessible for parsing.
@@ -203,9 +209,23 @@ export class StaxParser {
   }
 }
 
+/** Set a custom logger. By default, the library logs to the `console` object. */
+export function setupLogging(l?: typeof logger) {
+  if (l) {
+    logger = l;
+  } else {
+    logger = {
+      debug: () => {},
+      info: () => {},
+      warn: () => {},
+      error: console.error,
+    };
+  }
+}
+
 export function logWithPosition(
   msg: string,
-  level: 'log' | 'warn' | 'error' = 'log',
+  level: 'log' | 'info' | 'debug' | 'warn' | 'error' = 'log',
   tag: Tag,
 ): void {
   console[level](
