@@ -228,6 +228,66 @@ exports[`hOCR parser > should be able to handle a hOCR doc with alternatives 2`]
 ]
 `;
 
+exports[`hOCR parser > should be able to handle hocr with a single line without whitespace 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "height": 24,
+                  "hyphenStart": false,
+                  "text": "ii",
+                  "type": "word",
+                  "width": 31,
+                  "x": 233,
+                  "y": 1258,
+                },
+                {
+                  "height": 13,
+                  "hyphenStart": false,
+                  "text": ".",
+                  "type": "word",
+                  "width": 11,
+                  "x": 260,
+                  "y": 1272,
+                },
+              ],
+              "height": 27,
+              "type": "line",
+              "width": 38,
+              "x": 233,
+              "y": 1258,
+            },
+          ],
+          "height": 27,
+          "type": "paragraph",
+          "width": 38,
+          "x": 233,
+          "y": 1258,
+        },
+      ],
+      "height": 27,
+      "type": "block",
+      "width": 38,
+      "x": 233,
+      "y": 1258,
+    },
+  ],
+  "features": [],
+  "height": 1859,
+  "imageSource": {
+    "documentIdentifier": "bsb10446366_00016",
+  },
+  "physicalPageNumber": 16,
+  "type": "page",
+  "width": 1178,
+}
+`;
+
 exports[`hOCR parser > should be able to handle lines with only empty words 1`] = `
 [
   {

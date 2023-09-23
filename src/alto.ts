@@ -340,6 +340,7 @@ async function handleWord(
       openTags++;
       if ((data as Tag).name === 'Shape') {
         const polygon = await handleShape(eventIter, ctx, tag);
+        openTags--;
         if (polygon != null) {
           word.polygon = polygon;
         }

@@ -387,7 +387,7 @@ async function handleWord(
     }
   }
   if (!wordText.length) {
-    logWithPosition('Word element has no text, skipping.', 'warn', tag);
+    logWithPosition('Word element has no text, skipping.', 'debug', tag);
     return;
   }
   const word: OcrWord = {
@@ -539,21 +539,6 @@ export async function* parseHocrPages(
     );
     if (!page) {
       continue;
-    }
-    const hasSpacesEncoded = page.lines.some((line) =>
-      line.children.some(
-        (child) => typeof child === 'string' && child.includes(' '),
-      ),
-    );
-    if (!hasSpacesEncoded) {
-      // Add spaces between words, except for last word on line
-      for (const line of page.lines) {
-        for (let idx = 0; idx < line.children.length - 1; idx++) {
-          if (typeof line.children[idx + 1] !== 'string') {
-            line.children.splice(idx + 1, 0, ' ');
-          }
-        }
-      }
     }
     yield page;
   }

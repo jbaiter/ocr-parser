@@ -87,7 +87,24 @@ describe('parseAltoPage', () => {
     const pages = await toArray(parseAltoPages(WITH_SHAPE));
     expect(pages).toHaveLength(1);
     const page = pages[0];
-    expect(page?.text).toMatchInlineSnapshot('"EEn"');
+    expect(page?.text).toEqual('EEn F~iJJcher');
+    expect(page).toMatchSnapshot();
+  });
+
+  it('parses alto without explicitly encoded spaces', async () => {
+    const pages = await toArray(
+      parseAltoPages(WITH_ALTERNATIVES.replace(/<SP.*?\/>/g, ''), [
+        {
+          width: 6113,
+          height: 5115,
+        },
+      ]),
+    );
+    expect(pages).toHaveLength(1);
+    const page = pages[0];
+    expect(page?.text).toEqual(
+      'J a Ira mj iI tE1r 3 i c JiLas Edition THE WINCHESTER NEWS I her injuries wsis made Dr Reynolds an eye specialist after lite examina cents and GO of Henry C Hall average weight 1410 > ounds at 0 cents',
+    );
     expect(page).toMatchSnapshot();
   });
 });

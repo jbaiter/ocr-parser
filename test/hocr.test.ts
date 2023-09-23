@@ -19,6 +19,8 @@ expect.addSnapshotSerializer({
 
 //@ts-expect-error
 import WITH_EMPTY_LINE from './__fixtures__/hocr_emptyline.html?raw';
+//@ts-expect-error
+import BSB_HOCR from './__fixtures__/bsb10446366_00016.html?raw';
 
 const makeHocr = (hocrBody: string) => `
 <?xml version="1.0" encoding="UTF-8"?>
@@ -144,5 +146,11 @@ describe('hOCR parser', () => {
     const pages = await toArray(parseHocrPages(WITH_EMPTY_LINE));
     expect(pages).toHaveLength(1);
     expect(pages[0].lines).toMatchSnapshot();
+  });
+
+  test('should be able to handle hocr with a single line without whitespace', async () => {
+    const pages = await toArray(parseHocrPages(BSB_HOCR));
+    expect(pages).toHaveLength(1);
+    expect(pages[0]).toMatchSnapshot();
   });
 });
