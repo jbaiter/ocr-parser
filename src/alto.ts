@@ -67,8 +67,8 @@ async function handlePage(
   if (!dims.width || !dims.height) {
     throw new Error('Could not get Page dimensions');
   }
-  const scaleFactorX = referenceSize ? referenceSize.width / dims.height! : 1;
-  const scaleFactorY = referenceSize ? referenceSize.height / dims.width! : 1;
+  const scaleFactorX = referenceSize ? referenceSize.width / dims.width! : 1;
+  const scaleFactorY = referenceSize ? referenceSize.height / dims.height! : 1;
   if (scaleFactorX !== scaleFactorY) {
     console.warn(
       `Scale factors differ: x=${scaleFactorX} vs y=${scaleFactorY}, using X scale factor.`,

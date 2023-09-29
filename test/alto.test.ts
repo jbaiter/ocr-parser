@@ -70,8 +70,8 @@ describe('parseAltoPage', () => {
     const pages = await toArray(
       parseAltoPages(WITH_ALTERNATIVES, [
         {
-          width: 6113,
-          height: 5115,
+          width: 20463,
+          height: 25941,
         },
       ]),
     );
@@ -95,8 +95,8 @@ describe('parseAltoPage', () => {
     const pages = await toArray(
       parseAltoPages(WITH_ALTERNATIVES.replace(/<SP.*?\/>/g, ''), [
         {
-          width: 6113,
-          height: 5115,
+          width: 20463,
+          height: 25941,
         },
       ]),
     );
@@ -106,5 +106,35 @@ describe('parseAltoPage', () => {
       'J a Ira mj iI tE1r 3 i c JiLas Edition THE WINCHESTER NEWS I her injuries wsis made Dr Reynolds an eye specialist after lite examina cents and GO of Henry C Hall average weight 1410 > ounds at 0 cents',
     );
     expect(page).toMatchSnapshot();
+  });
+
+  it('parses alto with a reference size smaller than the page size', async () => {
+    const scaleFactor = 0.25;
+    const unscaledPages = await toArray(
+      parseAltoPages(WITH_ALTERNATIVES, [
+        {
+          width: 20463,
+          height: 25941,
+        },
+      ]),
+    );
+    const scaledPages = await toArray(
+      parseAltoPages(WITH_ALTERNATIVES, [
+        {
+          width: 20463 * scaleFactor,
+          height: 25941 * scaleFactor,
+        },
+      ]),
+    );
+    const words = unscaledPages[0].words;
+    const scaledWords = scaledPages[0].words;
+    for (const [i, word] of scaledWords.entries()) {
+      expect(word).toMatchObject({
+        x: words[i].x * scaleFactor,
+        y: words[i].y * scaleFactor,
+        width: words[i].width * scaleFactor,
+        height: words[i].height * scaleFactor,
+      });
+    }
   });
 });
