@@ -1,6 +1,6 @@
 {
   "name": "ocr-parser",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Fast and efficient DOM-less OCR parser for use in browsers (including Workers) and Node",
   "type": "module",
   "main": "dist/index.cjs",

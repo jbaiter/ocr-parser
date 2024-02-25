@@ -61,21 +61,22 @@ export async function parseOcrPage(
     );
   }
   let page: OcrPage | null;
-  switch (format) {
-    case 'hocr':
-      page = (
-        await parseHocrPages(
-          markup,
-          referenceSize ? [referenceSize] : undefined,
-        ).next()
-      ).value;
-    case 'alto':
-      page = (
-        await parseAltoPages(
-          markup,
-          referenceSize ? [referenceSize] : undefined,
-        ).next()
-      ).value;
+  if (format === 'hocr') {
+    page = (
+      await parseHocrPages(
+        markup,
+        referenceSize ? [referenceSize] : undefined,
+      ).next()
+    ).value;
+  } else if (format === 'alto') {
+    page = (
+      await parseAltoPages(
+        markup,
+        referenceSize ? [referenceSize] : undefined,
+      ).next()
+    ).value;
+  } else {
+    throw new Error(`Unsupported format: ${format}`);
   }
   if (!page) {
     throw new Error('Failed to parse page');
